@@ -3,9 +3,9 @@
 import UIKit
 
 protocol Profilable: CustomStringConvertible {
-    mutating func write() -> Double
-    func read() -> Double
-    func enumerate() -> Double
+    mutating func write() -> TimeInterval
+    func read() -> TimeInterval
+    func enumerate() -> TimeInterval
 }
 
 struct ProfilableArray: Profilable {
@@ -58,7 +58,7 @@ class ProfilableNSMutableArray : Profilable {
     
     func write() -> Double {
         let start = Date()
-        array.adding("42")
+        array.add("42")
         let finish = Date()
         return finish.timeIntervalSince(start)
     }
@@ -155,9 +155,22 @@ class Result {
     }
 }
 
+extension Double {
+    func toString(_ fractionDigits:Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = fractionDigits
+        formatter.maximumFractionDigits = fractionDigits
+        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
+    }
+}
+
 extension Result: CustomStringConvertible {
     var description: String {
-        return "\n Min . . \(min)\n Avg . . \(avarage)\n Max . . \(max)\n Total . \(total)"
+        return "\n Min . . \(min.toString(8))" +
+            "\n Avg . . \(avarage.toString(8))" +
+            "\n Max . . \(max.toString(8))" +
+            "\n Total . \(total.toString(8))"
     }
 }
 
@@ -191,7 +204,7 @@ func run(_ rounds: Int) {
         print("\(sut) :\n")
         print("Write : \(profile(sut.write(), with: rounds))\n")
         print("Read : \(profile(sut.read(), with: 100))\n")
-        print("Enumerate : \(profile(sut.enumerate(), with: 1))\n")
+        print("Enumerate : \(profile(sut.enumerate(), with: 4))\n")
     }
 }
 
