@@ -3,112 +3,203 @@
 import UIKit
 
 protocol Profilable: CustomStringConvertible {
-    mutating func appendTime() -> Double
+    mutating func write() -> Double
+    func read() -> Double
+    func enumerate() -> Double
 }
 
 struct ProfilableArray: Profilable {
-    private var expected: Int
-    private var array: [Int]
+    private var capacity: Int
+    private var array: [String]
     
-    init(){
-        expected = 0
-        array = [Int]()
+    init(capacity: Int = 0){
+        array = [String]()
+        self.capacity = capacity
+        array.reserveCapacity(capacity)
     }
     
-    init(expected: Int){
-        self.init()
-        self.expected = expected
-        array.reserveCapacity(expected)
-    }
-    
-    mutating func appendTime() -> Double {
+    mutating func write() -> Double {
         let start = Date()
-        array.append(42)
-        return abs(start.timeIntervalSinceNow)
+        array.append("42")
+        let finish = Date()
+        return finish.timeIntervalSince(start)
+    }
+    
+    func read() -> Double {
+        let i = Int(arc4random_uniform(UInt32(array.count)))
+        let start = Date()
+        let _ = array[i]
+        let finish = Date()
+        return finish.timeIntervalSince(start)
+    }
+    
+    func enumerate() -> Double {
+        let start = Date()
+        array.forEach { _ in }
+        let finish = Date()
+        return finish.timeIntervalSince(start)
     }
     
     var description: String {
-        return "\(String(describing:type(of: self))) (\(expected))"
+        return "\(String(describing:type(of: array))) (\(capacity))"
     }
 }
 
-extension NSMutableArray : Profilable {
-    func appendTime() -> Double {
-        let start = Date()
-        self.adding(42)
-        return abs(start.timeIntervalSinceNow)
+
+
+class ProfilableNSMutableArray : Profilable {
+    var capacity: Int
+    var array: NSMutableArray
+    
+    init(capacity: Int = 0){
+        array = NSMutableArray(capacity: capacity)
+        self.capacity = capacity
     }
     
-    open override var description: String {
-        return "\(String(describing:type(of: self)))"
+    func write() -> Double {
+        let start = Date()
+        array.adding("42")
+        let finish = Date()
+        return finish.timeIntervalSince(start)
+    }
+    
+    func read() -> Double {
+        let i = Int(arc4random_uniform(UInt32(array.count)))
+        let start = Date()
+        let _ = array[i]
+        let finish = Date()
+        return finish.timeIntervalSince(start)
+    }
+    
+     func enumerate() -> Double {
+        let start = Date()
+        array.forEach { _ in }
+        let finish = Date()
+        return finish.timeIntervalSince(start)
+    }
+    
+    var description: String {
+        return "\(String(describing:type(of: array))) (\(capacity))"
     }
 }
 
-extension CFMutableArray : Profilable {
-    func appendTime() -> Double {
-        var number = 5
+class ProfilableCFMutableArray : Profilable {
+    
+    var capacity: Int
+    var array: CFMutableArray!
+    
+    init(capacity: Int = 0) {
+        self.capacity = capacity
+        array = CFArrayCreateMutable(nil, capacity, nil)
+    }
+    
+    func write() -> Double {
+        var item = "5"
         let start = Date()
-        CFArrayAppendValue(self, &number)
-        return abs(start.timeIntervalSinceNow)
+        CFArrayAppendValue(array, &item)
+        let finish = Date()
+        return finish.timeIntervalSince(start)
+    }
+    
+    func read() -> Double {
+        let count = CFArrayGetCount(array)
+        let i = Int(arc4random_uniform(UInt32(count)))
+        let start = Date()
+        CFArrayGetValueAtIndex(array, CFIndex(i))
+        let finish = Date()
+        return finish.timeIntervalSince(start)
+    }
+    
+    func enumerate() -> Double {
+        var item = "6"
+        let count = CFArrayGetCount(array)
+        let start = Date()
+        CFArrayGetFirstIndexOfValue(array, CFRange.init(location: CFIndex(), length: count), &item)
+        let finish = Date()
+        return finish.timeIntervalSince(start)
     }
     
     public var description: String {
-        return "\(String(describing:type(of: self)))"
+        
+        return "\(String(describing:type(of: array))) \(capacity)"
     }
 }
 
-struct Result {
-    let max: Double
-    let avarage: Double
-    let min: Double
-    let overallTime: Double
+class Result {
+    private var _count: Int = 0
+    private var _total: Double = 0
+    
+    var min: Double
+    var max: Double
+    
+    init() {
+        min = Double.infinity
+        max = Double.infinity * (-1)
+    }
+    
+    var avarage: Double {
+        get {
+            return _total / Double(_count)
+        }
+    }
+    
+    var total: Double {
+        get {
+            return _total
+        }
+        
+        set(value) {
+            _total = value
+            _count += 1
+        }
+    }
 }
 
 extension Result: CustomStringConvertible {
     var description: String {
-        return "\n Min: \(min)\n Avg: \(avarage)\n Max: \(max)\n Overall: \(overallTime)"
+        return "\n Min . . \(min)\n Avg . . \(avarage)\n Max . . \(max)\n Total . \(total)"
     }
 }
 
-func profileWriting(_ array: inout Profilable, with count: Int) -> Result  {
-    var max = -1.0
-    var min = 1.0
-    var sum = 0.0
-    let start = Date()
-    
+func profile(_ action: @autoclosure () -> TimeInterval, with count: Int) -> Result {
+    var result = Result()
     for _ in 1...count {
+        let time = action()
+        result.total += time
         
-        let time = array.appendTime()
-        sum += time
-        if time > max {
-            max = time
+        if time > result.max {
+            result.max = time
         }
-        if time < min {
-            min = time
+        
+        if time < result.min {
+            result.min = time
         }
     }
     
-    return Result(max: max,
-                  avarage: sum / Double(count),
-                  min: min,
-                  overallTime: abs(start.timeIntervalSinceNow))
+    return result
 }
 
 func run(_ rounds: Int) {
     print("Runing \(rounds) rounds test")
-    let suts : [Profilable] = [NSMutableArray(),
-                               CFArrayCreateMutable(nil, 0, nil),
+    let suts : [Profilable] = [ProfilableNSMutableArray(),
+                               ProfilableNSMutableArray(capacity: rounds),
+                               ProfilableCFMutableArray(),
+                               ProfilableCFMutableArray(capacity: rounds),
                                ProfilableArray(),
-                               ProfilableArray(expected: rounds)]
+                               ProfilableArray(capacity: rounds)]
     for var sut in suts {
-        print("\(sut) : \(profileWriting(&sut, with: rounds))\n")
+        print("\(sut) :\n")
+        print("Write : \(profile(sut.write(), with: rounds))\n")
+        print("Read : \(profile(sut.read(), with: 100))\n")
+        print("Enumerate : \(profile(sut.enumerate(), with: 1))\n")
     }
 }
 
-run(10)
+print("✅")
 
 run(100)
 
 run(1000)
 
 run(10000)
+
