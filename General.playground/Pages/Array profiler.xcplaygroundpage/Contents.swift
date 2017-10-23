@@ -155,27 +155,29 @@ class Result {
     }
 }
 
-extension Double {
-    func toString(_ fractionDigits:Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.minimumFractionDigits = fractionDigits
-        formatter.maximumFractionDigits = fractionDigits
-        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
+extension TimeInterval {
+    var toString: String {
+        let ti = NSInteger(self)
+        let ms = Int((self.truncatingRemainder(dividingBy: 1.0)) * 1000)
+        let seconds = ti % 60
+        let minutes = (ti / 60) % 60
+        let hours = (ti / 3600)
+        
+        return String(format: "%0.2d:%0.2d:%0.2d.%0.3d",hours,minutes,seconds,ms)
     }
 }
 
 extension Result: CustomStringConvertible {
     var description: String {
-        return "\n Min . . \(min.toString(8))" +
-            "\n Avg . . \(avarage.toString(8))" +
-            "\n Max . . \(max.toString(8))" +
-            "\n Total . \(total.toString(8))"
+        return "\n Min . . \(min.toString)" +
+            "\n Avg . . \(avarage.toString)" +
+            "\n Max . . \(max.toString)" +
+            "\n Total . \(total.toString)"
     }
 }
 
 func profile(_ action: @autoclosure () -> TimeInterval, with count: Int) -> Result {
-    var result = Result()
+    let result = Result()
     for _ in 1...count {
         let time = action()
         result.total += time
