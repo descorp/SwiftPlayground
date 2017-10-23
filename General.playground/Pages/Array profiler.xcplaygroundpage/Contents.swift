@@ -45,8 +45,6 @@ struct ProfilableArray: Profilable {
     }
 }
 
-
-
 class ProfilableNSMutableArray : Profilable {
     var capacity: Int
     var array: NSMutableArray
@@ -156,23 +154,22 @@ class Result {
 }
 
 extension TimeInterval {
-    var toString: String {
-        let ti = NSInteger(self)
-        let ms = Int((self.truncatingRemainder(dividingBy: 1.0)) * 1000)
+    func toString() -> String {
+        let ti = Int(self)
+        let ms = Int((self.truncatingRemainder(dividingBy: 1) * 100000))
         let seconds = ti % 60
         let minutes = (ti / 60) % 60
-        let hours = (ti / 3600)
         
-        return String(format: "%0.2d:%0.2d:%0.2d.%0.3d",hours,minutes,seconds,ms)
+        return String(format: "%0.2d:%0.2d.%0.5d", minutes, seconds, ms)
     }
 }
 
-extension Result: CustomStringConvertible {
-    var description: String {
-        return "\n Min . . \(min.toString)" +
-            "\n Avg . . \(avarage.toString)" +
-            "\n Max . . \(max.toString)" +
-            "\n Total . \(total.toString)"
+extension Result {
+    var toString: String {
+        return "\n Min . . \(min.toString())" +
+            "\n Avg . . \(avarage.toString())" +
+            "\n Max . . \(max.toString())" +
+            "\n Total . \(total.toString())"
     }
 }
 
@@ -204,9 +201,9 @@ func run(_ rounds: Int) {
                                ProfilableArray(capacity: rounds)]
     for var sut in suts {
         print("\(sut) :\n")
-        print("Write : \(profile(sut.write(), with: rounds))\n")
-        print("Read : \(profile(sut.read(), with: 100))\n")
-        print("Enumerate : \(profile(sut.enumerate(), with: 4))\n")
+        print("Write : \(profile(sut.write(), with: rounds).toString)\n")
+        print("Read : \(profile(sut.read(), with: 100).toString)\n")
+        print("Enumerate : \(profile(sut.enumerate(), with: 4).toString)\n")
     }
 }
 
