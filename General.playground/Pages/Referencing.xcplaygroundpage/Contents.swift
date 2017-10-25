@@ -45,8 +45,6 @@ class WeakReferenced : ReferrenceProtocol {
 
 // MARK: references
 
-var globalStrong : ReferrenceProtocol!
-
 func BidirectionalStoredScope(_ left: ReferrenceProtocol, _ right: ReferrenceProtocol) {
     left.reference = right
     right.reference = left
@@ -70,92 +68,82 @@ func StoredViaTemporaryScope(_ left: ReferrenceProtocol, _ right: @autoclosure (
 
 func checkingStrongReferencedStoredInWeakReferenced() {
     print("\n -- Testing StrongReferenced Stored in WeakReferenced :")
-    globalStrong = StrongReferenced(value: "StrongReferenced")
-    BidirectionalStoredScope(globalStrong!, WeakReferenced(value: "WeakReferenced"))
+    let localStrong = StrongReferenced(value: "StrongReferenced")
+    BidirectionalStoredScope(localStrong, WeakReferenced(value: "WeakReferenced"))
     
-    print("If kill \(globalStrong!.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingStrongReferencedNotStoredInWeakReferenced() {
     print("\n -- Testing StrongReferenced NOT Stored in WeakReferenced :")
-    globalStrong = StrongReferenced(value: "StrongReferenced")
-    MonodirectionalStoredScope(globalStrong!, WeakReferenced(value: "WeakReferenced"))
+    let localStrong = StrongReferenced(value: "StrongReferenced")
+    MonodirectionalStoredScope(localStrong, WeakReferenced(value: "WeakReferenced"))
     
-    print("If kill \(globalStrong!.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingWeakReferencedStoredInStrongReferenced() {
     print("\n -- Testing WeakReferenced Stored in StrongReferenced :")
-    globalStrong = WeakReferenced(value: "WeakReferenced")
-    BidirectionalStoredScope(StrongReferenced(value: "StrongReferenced"), globalStrong!)
+    let localStrong = WeakReferenced(value: "WeakReferenced")
+    BidirectionalStoredScope(StrongReferenced(value: "StrongReferenced"), localStrong)
     
-    print("If kill \(globalStrong!.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingWeakReferencedNotStoredInStrongReferenced() {
     print("\n -- Testing StrongReferenced NOT Stored in WeakReferenced :")
-    globalStrong = WeakReferenced(value: "WeakReferenced")
-    MonodirectionalStoredScope(StrongReferenced(value: "StrongReferenced"), globalStrong!)
+    let localStrong = WeakReferenced(value: "WeakReferenced")
+    MonodirectionalStoredScope(StrongReferenced(value: "StrongReferenced"), localStrong)
     
-    print("If kill \(globalStrong!.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingStrongReferencedStoredInStrongReferenced() {
     print("\n -- Testing StrongReferenced Stored in StrongReferenced :")
-    globalStrong = StrongReferenced(value: "StrongReferenced")
-    BidirectionalStoredScope(StrongReferenced(value: "Second StrongReferenced"), globalStrong!)
+    let localStrong = StrongReferenced(value: "StrongReferenced")
+    BidirectionalStoredScope(StrongReferenced(value: "Second StrongReferenced"), localStrong)
     
-    print("If kill \(globalStrong!.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingStrongReferencedNotStoredInStrongReferenced() {
     print("\n -- Testing StrongReferenced NOT Stored in StrongReferenced :")
-    globalStrong = StrongReferenced(value: "StrongReferenced")
-    MonodirectionalStoredScope(StrongReferenced(value: "Second StrongReferenced"), globalStrong)
+    let localStrong = StrongReferenced(value: "StrongReferenced")
+    MonodirectionalStoredScope(StrongReferenced(value: "Second StrongReferenced"), localStrong)
     
-    print("If kill \(globalStrong.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingStrongReferencedStoredViaTempInStrongReferenced() {
-    print("\n -- Testing StrongReferenced via temp reference stored in StrongReferenced :")
-    globalStrong = StrongReferenced(value: "StrongReferenced")
-    StoredViaTemporaryScope(StrongReferenced(value: "Second StrongReferenced"), globalStrong)
+    print("\n -- Testing StrongReferenced via temp reference stored in WeakReferenced :")
+    let localStrong = WeakReferenced(value: "Local WeakReferenced")
+    StoredViaTemporaryScope(localStrong, StrongReferenced(value: "StrongReferenced"))
     
-    print("If kill \(globalStrong.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingStrongReferencedStoredViaTempInWeakReferenced() {
     print("\n -- Testing WeakReferenced via temp reference stored in StrongReferenced :")
-    globalStrong = StrongReferenced(value: "StrongReferenced")
-    StoredViaTemporaryScope(WeakReferenced(value: "WeakReferenced"), globalStrong)
+    let localStrong = StrongReferenced(value: "Local StrongReferenced")
+    StoredViaTemporaryScope(localStrong, WeakReferenced(value: "WeakReferenced"))
     
-    print("If kill \(globalStrong.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingWeakReferencedStoredViaTempInStrongReferenced() {
-    print("\n -- Testing StrongReferenced via temp reference stored in StrongReferenced :")
-    globalStrong = StrongReferenced(value: "StrongReferenced")
-    StoredViaTemporaryScope(globalStrong, StrongReferenced(value: "Second StrongReferenced"))
+    print("\n -- Testing StrongReferenced via temp reference stored in Local StrongReferenced :")
+    let localStrong = StrongReferenced(value: "Local StrongReferenced")
+    StoredViaTemporaryScope(localStrong, StrongReferenced(value: "Second StrongReferenced"))
     
-    print("If kill \(globalStrong.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 func checkingWeakReferencedStoredViaTempInWeakReferenced() {
-    print("\n -- Testing WeakReferenced via temp reference stored in StrongReferenced :")
-    globalStrong = WeakReferenced(value: "WeakReferenced")
-    StoredViaTemporaryScope(globalStrong, WeakReferenced(value: "WeakReferenced"))
+    print("\n -- Testing WeakReferenced via temp reference stored in WeakReferenced :")
+    let localStrong = WeakReferenced(value: "Local WeakReferenced")
+    StoredViaTemporaryScope(localStrong, WeakReferenced(value: "Second WeakReferenced"))
     
-    print("If kill \(globalStrong.value):")
-    globalStrong = nil
+    print("If \(localStrong.value) leave the scope:")
 }
 
 //: [Next](@next)
@@ -170,3 +158,5 @@ checkingStrongReferencedStoredInStrongReferenced()
 checkingStrongReferencedNotStoredInStrongReferenced()
 checkingStrongReferencedStoredViaTempInStrongReferenced()
 checkingStrongReferencedStoredViaTempInWeakReferenced()
+checkingWeakReferencedStoredViaTempInStrongReferenced()
+checkingWeakReferencedStoredViaTempInWeakReferenced()
