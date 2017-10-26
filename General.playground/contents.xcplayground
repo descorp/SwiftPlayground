@@ -6,5 +6,7 @@
         <page name='MultyThread'/>
         <page name='Operators'/>
         <page name='Referencing'/>
+        <page name='Compiler issues'/>
+        <page name='Referencing - private fields'/>
     </pages>
 </playground>
