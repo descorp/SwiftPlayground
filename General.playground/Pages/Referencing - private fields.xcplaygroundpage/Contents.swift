@@ -17,9 +17,26 @@ class Item {
 class Container {
     weak var item: Item?
     
+    init() {
+        print("Item created")
+    }
+    
     func initItem() {
         print("At first \(self)")
         item = Item()
+        print("When leaving local scope \(self)")
+    }
+    
+    func initItemAsClosure(_ item: @autoclosure () -> Item) {
+        print("At first \(self)")
+        self.item = item()
+        print("When leaving local scope \(self)")
+    }
+    
+    func initItemAsClosureForSure(_ item: @autoclosure () -> Item) {
+        print("At first \(self)")
+        let temp = item()
+        self.item = temp
         print("When leaving local scope \(self)")
     }
     
@@ -76,6 +93,18 @@ func initWeakForSure() {
     print("\nLeaving global scope")
 }
 
+func initWeakWithClosure() {
+    let sut = Container()
+    sut.initItemAsClosure(Item())
+    print("\nLeaving global scope")
+}
+
+func initWeakWithClosureForSure() {
+    let sut = Container()
+    sut.initItemAsClosureForSure(Item())
+    print("\nLeaving global scope")
+}
+
 func initWeakAndAssignContainer() {
     let sut = Container()
     sut.initItemAndAssignContainer()
@@ -93,6 +122,12 @@ initWeak()
 
 print("\n--Trying init weak for sure")
 initWeakForSure()
+
+print("\n--Trying init weak with closure")
+initWeakWithClosure()
+
+print("\n--Trying init weak with closure for sure")
+initWeakWithClosureForSure()
 
 print("\n--Trying init weak and assign container")
 initWeakAndAssignContainer()
