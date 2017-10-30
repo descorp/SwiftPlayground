@@ -8,5 +8,6 @@
         <page name='Referencing'/>
         <page name='Compiler issues'/>
         <page name='Referencing - private fields'/>
+        <page name='DependencyInjection'/>
     </pages>
 </playground>
