@@ -5,6 +5,7 @@
         <page name='Compiler issues'/>
         <page name='Dependency Injection'/>
         <page name='Enums'/>
+        <page name='Lazy'/>
         <page name='MultyThread'/>
         <page name='Operators'/>
         <page name='Referencing'/>
