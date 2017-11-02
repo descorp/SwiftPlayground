@@ -4,6 +4,7 @@
         <page name='Array profiler'/>
         <page name='Compiler issues'/>
         <page name='Dependency Injection'/>
+        <page name='Enums'/>
         <page name='MultyThread'/>
         <page name='Operators'/>
         <page name='Referencing'/>
