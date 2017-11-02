@@ -24,20 +24,27 @@ for case let (letter, number) in array where 0...2 ~= number {
 }
 
 print(" --- As parametric value ---\n")
-func check(a: String?, b: String?) {
+func check(_ a: String?, _ b: String?) {
     switch (a, b) {
-    case let (.some(a), .some(b) ):
-        print ("\(a) - \(b)")
     case let (.some(a), .none):
         print ("\(a) - no b")
     case (_, "B"?):
         print ("second is B !")
     case (let value?, _) where value == "A":
         print ("first is A !")
+    case let (.some(a), .some(b)):
+        print ("\(a) - \(b)")
+    case (.none , .none):
+         print("empty")
     default:
-        print("some")
+        print("something else")
     }
 }
+
+check(nil, nil)
+check("A", "B")
+check("a", nil)
+check("A", "b")
 
 
 print("✅")
