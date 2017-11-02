@@ -9,5 +9,6 @@
         <page name='Compiler issues'/>
         <page name='Referencing - private fields'/>
         <page name='DependencyInjection'/>
+        <page name='Tuples'/>
     </pages>
 </playground>
