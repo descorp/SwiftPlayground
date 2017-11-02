@@ -13,5 +13,6 @@
         <page name='Referencing - closures'/>
         <page name='Tuples'/>
         <page name='Timer'/>
+        <page name='ProxyLimiter'/>
     </pages>
 </playground>
