@@ -5,12 +5,19 @@ Number of playgrounds to try different aspects of Swift.
 
 ### Simple playgrounds
 
-* Timer
 * Array profiler
+* Compiler issues
+* Dependency Injection
+* Enums
+* Lazy
 * Multithreading
 * Operators
 * Referencing
-* Compiler issues
+* Referencing - private fields
+* Referencing - closures
+* Tuples
+* Timer
+* ProxyLimiter
 
 ### UI-based playgrounds
 
@@ -20,3 +27,4 @@ Number of playgrounds to try different aspects of Swift.
 
 * Rx
 * Promises
+* Algorithms
