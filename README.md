@@ -1,4 +1,6 @@
+![swift icon](https://png.icons8.com/?id=24465&size=96 "Icon pack by Icons8")
 # SwiftPlayground
+
 Number of playgrounds to try different aspects of Swift.
 
 ## Content
@@ -28,3 +30,5 @@ Number of playgrounds to try different aspects of Swift.
 * Rx
 * Promises
 * Algorithms
+
+Swift Image taken from <a href="https://icons8.com">Icon pack by Icons8</a>
