@@ -1,35 +1,66 @@
 //: [Previous](@previous)
 
 import Foundation
+import PlaygroundSupport
+PlaygroundPage.current.needsIndefiniteExecution = true
 
 var str = "Hello, playground"
 
 //: [Next](@next)
 
+extension Date {
+    var asString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter.string(from: self)
+    }
+}
+
 protocol ProxyProtocal {
     func call(action: @autoclosure () -> Void)
 }
 
-class Proxy: ProxyProtocal {
+class Proxy: NSLock, ProxyProtocal {
     private let max: Int
     private let interval: Int
-    private var isTimerSet = false
     
+    private var _isTimerSet = false
     private var n = 0
-    private let lock = NSRecursiveLock()
     
-    private var counter: Int {
+    private var isTimerSet: Bool {
         get {
-            var temp: Int?
-            synchronize {
-                temp = n
+            let temp: Bool?
+            self.lock()
+            temp = _isTimerSet
+            defer {
+                self.unlock()
             }
+            
             return temp!
         }
         set(value) {
-            synchronize {
-                n = value
+            self.lock()
+            _isTimerSet = value
+            self.unlock()
+        }
+    }
+    
+    private var counter: Int {
+        get {
+            let temp: Int?
+            self.lock()
+            temp = n
+            defer {
+                self.unlock()
             }
+            
+            return temp!
+        }
+        
+        set(value) {
+            self.lock()
+            n = value
+            self.unlock()
         }
     }
     
@@ -39,52 +70,32 @@ class Proxy: ProxyProtocal {
     }
     
     func call(action: @autoclosure () -> Void) {
+        
         if !isTimerSet {
-            let deadlineTime = DispatchTime.now() + .seconds(interval)
-            DispatchQueue.global().asyncAfter(deadline: deadlineTime) {
-                    self.synchronize {
-                        self.counter = 0
-                        self.isTimerSet = false
-                    }
+            self.isTimerSet = true
+            Timer.scheduledTimer(withTimeInterval: Double(interval), repeats: false) { [unowned self] _ in
+                self.counter = 0
+                self.isTimerSet = false
             }
         }
         
-        guard counter < max else {
-            print("Denied!")
-            return
-        }
-        
-        counter += 1
-        action()
-    }
-    
-    private func synchronize(closure: ()->()){
-        lock.lock()
-        defer {
-            closure()
-            lock.unlock()
+        DispatchQueue.global().sync { [unowned self] in
+            guard self.counter < self.max else {
+                print("\(Date().asString) Denied!")
+                return
+            }
+            
+            counter += 1
+            action()
         }
     }
 }
 
 func test(proxy: ProxyProtocal) {
-    
-    for _ in 0...12 {
-        proxy.call(action: print("done!"))
-    }
-    
-    print("\nwaiting..\n")
-    sleep(2)
-    
-    for _ in 0...12 {
-        proxy.call(action: print("done!"))
-    }
-    
-    print("\nwaiting..\n")
-    sleep(2)
-    
-    for _ in 0...12 {
-        proxy.call(action: print("done!"))
+    for i in 1...30 {
+        Timer.scheduledTimer(withTimeInterval: Double(i) * 0.09, repeats: false) { _ in
+            proxy.call(action: print("\(Date().asString) \(i) done!"))
+        }
     }
 }
 
