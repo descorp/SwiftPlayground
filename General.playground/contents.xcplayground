@@ -11,6 +11,7 @@
         <page name='Referencing'/>
         <page name='Referencing - private fields'/>
         <page name='Referencing - closures'/>
+        <page name='Strings'/>
         <page name='Tuples'/>
         <page name='Timer'/>
         <page name='ProxyLimiter'/>
