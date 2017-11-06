@@ -6,21 +6,46 @@ var str = "Hello, playground"
 
 //: [Next](@next)
 
-class A {
+enum TreeError : Error {
+    case nullReferenceError
+}
+
+class Node: Comparable {
+    var left: Node?
+    var right: Node?
+    var value: Int = 0
     
-    subscript(index: Int) -> Int {
-        get {
-            return 3
-        }
-        
-        set(value) {
-            
-        }
+    init(_ value: Int) {
+        self.value = value
+    }
+    
+    static func <(lhs: Node, rhs: Node) -> Bool {
+        return lhs.value < rhs.value
+    }
+
+    static func ==(lhs: Node, rhs: Node) -> Bool {
+        return lhs.value == rhs.value
     }
 }
 
+class Tree {
+    private var array = [Node]()
+    
+    subscript(index: Int) -> Node? {
+        get {
+            return array[index]
+        }
+        
+        set(value) {
+            if let value = value {
+                array[index] = value
+            } else {
+                array.remove(at: index)
+            }
+        }
+    }
+    
+    
+}
 
-var a = A()
-
-a[2]
-a[1]
+var a = Tree()
