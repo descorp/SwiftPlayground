@@ -4,13 +4,24 @@ import UIKit
 import PlaygroundSupport
 PlaygroundPage.current.needsIndefiniteExecution = true
 
-protocol Profilable: CustomStringConvertible {
-    mutating func write() -> TimeInterval
-    func read() -> TimeInterval
-    func enumerate() -> TimeInterval
+enum MeasureType {
+    case write, read, enumerate, check
 }
 
-struct ProfilableArray: Profilable {
+protocol Profilable: class, CustomStringConvertible {
+    func getAction(_ type: MeasureType) -> () -> Void
+}
+
+extension Profilable {
+    func measure(_ type: MeasureType) -> TimeInterval {
+        let block = self.getAction(type)
+        let start = CFAbsoluteTimeGetCurrent()
+        block()
+        return CFAbsoluteTimeGetCurrent() - start
+    }
+}
+
+class ProfilableArray: Profilable {
     private var capacity: Int
     private var array: [String]
     
@@ -20,31 +31,27 @@ struct ProfilableArray: Profilable {
         array.reserveCapacity(capacity)
     }
     
-    mutating func write() -> Double {
-        let start = CFAbsoluteTimeGetCurrent()
-        array.append("42")
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-    func read() -> Double {
+    func getAction(_ type: MeasureType) -> () -> Void {
         let i = Int(arc4random_uniform(UInt32(array.count)))
-        let start = CFAbsoluteTimeGetCurrent()
-        let _ = array[i]
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-    func enumerate() -> Double {
-        let start = CFAbsoluteTimeGetCurrent()
-        array.forEach { _ in }
-        return CFAbsoluteTimeGetCurrent() - start
+        
+        switch type {
+        case .write:
+            return { [unowned self] in self.array.append("42") }
+        case .read:
+            return { [unowned self] in let _ = self.array[i] }
+        case .enumerate:
+            return { [unowned self] in self.array.forEach { _ in } }
+        case .check:
+            return { [unowned self] in print(self.array.count > 0 ? "Nice" : "Not Nice") }
+        }
     }
     
     var description: String {
-        return "  Array \(capacity > 0 ? "R " : "NR")   "
+        return "    Array   \(capacity > 0 ? "R " : "NR")   "
     }
 }
 
-struct ProfilableContiguousArray: Profilable {
+class ProfilableContiguousArray: Profilable {
     private var capacity: Int
     private var array: ContiguousArray<String>
     
@@ -54,27 +61,23 @@ struct ProfilableContiguousArray: Profilable {
         array.reserveCapacity(capacity)
     }
     
-    mutating func write() -> Double {
-        let start = CFAbsoluteTimeGetCurrent()
-        array.append("42")
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-    func read() -> Double {
+    func getAction(_ type: MeasureType) -> () -> Void {
         let i = Int(arc4random_uniform(UInt32(array.count)))
-        let start = CFAbsoluteTimeGetCurrent()
-        let _ = array[i]
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-    func enumerate() -> Double {
-        let start = CFAbsoluteTimeGetCurrent()
-        array.forEach { _ in }
-        return CFAbsoluteTimeGetCurrent() - start
+        
+        switch type {
+        case .write:
+            return { [unowned self] in self.array.append("42") }
+        case .read:
+            return { [unowned self] in let _ = self.array[i] }
+        case .enumerate:
+            return { [unowned self] in self.array.forEach { _ in } }
+        case .check:
+            return { [unowned self] in print(self.array.count > 0 ? "Nice" : "Not Nice") }
+        }
     }
     
     var description: String {
-        return "ContArray \(capacity > 0 ? "R " : "NR") "
+        return " Contiguous \(capacity > 0 ? "R " : "NR")   "
     }
 }
 
@@ -87,27 +90,23 @@ class ProfilableNSMutableArray : Profilable {
         self.capacity = capacity
     }
     
-    func write() -> Double {
-        let start = CFAbsoluteTimeGetCurrent()
-        array.add("42")
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-    func read() -> Double {
+    func getAction(_ type: MeasureType) -> () -> Void {
         let i = Int(arc4random_uniform(UInt32(array.count)))
-        let start = CFAbsoluteTimeGetCurrent()
-        let _ = array[i]
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-     func enumerate() -> Double {
-        let start = CFAbsoluteTimeGetCurrent()
-        array.forEach { _ in }
-        return CFAbsoluteTimeGetCurrent() - start
+        
+        switch type {
+        case .write:
+            return { [unowned self] in self.array.add("42") }
+        case .read:
+            return { [unowned self] in let _ = self.array[i] }
+        case .enumerate:
+            return { [unowned self] in self.array.forEach { _ in } }
+        case .check:
+            return { [unowned self] in print(self.array.count > 0 ? "Nice" : "Not Nice") }
+        }
     }
     
     var description: String {
-        return "  NSArray \(capacity > 0 ? "R " : "NR") "
+        return "    NSArray \(capacity > 0 ? "R " : "NR")   "
     }
 }
 
@@ -121,31 +120,26 @@ class ProfilableCFMutableArray : Profilable {
         array = CFArrayCreateMutable(nil, capacity, nil)
     }
     
-    func write() -> Double {
+    func getAction(_ type: MeasureType) -> () -> Void {
         var item = "5"
-        let start = CFAbsoluteTimeGetCurrent()
-        CFArrayAppendValue(array, &item)
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-    func read() -> Double {
+        var other_item = "6"
         let count = CFArrayGetCount(array)
         let i = Int(arc4random_uniform(UInt32(count)))
-        let start = CFAbsoluteTimeGetCurrent()
-        CFArrayGetValueAtIndex(array, CFIndex(i))
-        return CFAbsoluteTimeGetCurrent() - start
-    }
-    
-    func enumerate() -> Double {
-        var item = "6"
-        let count = CFArrayGetCount(array)
-        let start = CFAbsoluteTimeGetCurrent()
-        CFArrayGetFirstIndexOfValue(array, CFRange.init(location: CFIndex(), length: count), &item)
-        return CFAbsoluteTimeGetCurrent() - start
+        
+        switch type {
+        case .write:
+            return { [unowned self] in CFArrayAppendValue(self.array, &item) }
+        case .read:
+            return { [unowned self] in CFArrayGetValueAtIndex(self.array, CFIndex(i)) }
+        case .enumerate:
+            return { [unowned self] in CFArrayGetFirstIndexOfValue(self.array, CFRange.init(location: CFIndex(), length: count), &other_item) }
+        case .check:
+            return { [unowned self] in print( Int(CFArrayGetCount(self.array)) > 0 ? "Nice" : "Not Nice") }
+        }
     }
     
     public var description: String {
-        return "  CFArray \(capacity > 0 ? "R " : "NR") "
+        return "    CFArray \(capacity > 0 ? "R " : "NR")   "
     }
 }
 
@@ -215,6 +209,9 @@ func profile(_ action: @autoclosure () -> TimeInterval, with count: Int) -> Resu
 }
 
 func run(_ rounds: Int) {
+    var results = [(type: Profilable, write: Result, read: Result, enumerate: Result)]()
+    let group = DispatchGroup()
+    
     let suts : [Profilable] = [ProfilableNSMutableArray(),
                                ProfilableNSMutableArray(capacity: rounds),
                                ProfilableContiguousArray(),
@@ -223,16 +220,13 @@ func run(_ rounds: Int) {
                                ProfilableCFMutableArray(capacity: rounds),
                                ProfilableArray(),
                                ProfilableArray(capacity: rounds)]
-    let group = DispatchGroup()
-    
-    var results = [(type: Profilable, write: Result, read: Result, enumerate: Result)]()
     for var sut in suts {
         group.enter()
         DispatchQueue.global().async {
             results.append((type: sut,
-                            write: profile(sut.write(), with: rounds),
-                            read: profile(sut.read(), with: 100),
-                            enumerate: profile(sut.enumerate(), with: 4)))
+                            write: profile(sut.measure(.write), with: rounds),
+                            read: profile(sut.measure(.read), with: 100),
+                            enumerate: profile(sut.measure(.enumerate), with: 4)))
             group.leave()
         }
     }
@@ -240,19 +234,19 @@ func run(_ rounds: Int) {
     group.notify(queue: .main) {
         print("\n # # # Runing \(rounds) rounds test # # #")
         print("\n-- Write --")
-        print("    Type     |     Min     |     Avg     |     Max     |    Total    ")
+        print("       Type      |     Min     |     Avg     |     Max     |    Total    ")
         results.sorted { $0.type.description > $1.type.description } .forEach { (type, write, _, _) in
             print("\(type)|\(write.toString)")
         }
         
         print("\n-- Read --")
-        print("    Type     |     Min     |     Avg     |     Max     |    Total    ")
+        print("       Type      |     Min     |     Avg     |     Max     |    Total    ")
         results.sorted { $0.type.description > $1.type.description } .forEach { (type, _, read, _) in
             print("\(type)|\(read.toString)")
         }
         
         print("\n-- Enumerate --")
-        print("    Type     |     Min     |     Avg     |     Max     |    Total    ")
+        print("       Type      |     Min     |     Avg     |     Max     |    Total    ")
         results.sorted { $0.type.description > $1.type.description } .forEach { (type, _, _, enumerate) in
             print("\(type)|\(enumerate.toString)")
         }
@@ -266,10 +260,6 @@ DispatchQueue.global().sync {
 }
 
 DispatchQueue.global().sync {
-    run(1000)
-}
-
-DispatchQueue.global().sync {
-    run(10000)
+    run(100000)
 }
 
