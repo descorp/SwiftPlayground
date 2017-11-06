@@ -1,6 +1,8 @@
 //: Playground - noun: a place where people can play
 
 import UIKit
+import PlaygroundSupport
+PlaygroundPage.current.needsIndefiniteExecution = true
 
 protocol Profilable: CustomStringConvertible {
     mutating func write() -> TimeInterval
@@ -19,29 +21,60 @@ struct ProfilableArray: Profilable {
     }
     
     mutating func write() -> Double {
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         array.append("42")
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     func read() -> Double {
         let i = Int(arc4random_uniform(UInt32(array.count)))
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         let _ = array[i]
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     func enumerate() -> Double {
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         array.forEach { _ in }
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     var description: String {
-        return "\(String(describing:type(of: array))) (\(capacity))"
+        return "  Array \(capacity > 0 ? "R " : "NR")   "
+    }
+}
+
+struct ProfilableContiguousArray: Profilable {
+    private var capacity: Int
+    private var array: ContiguousArray<String>
+    
+    init(capacity: Int = 0){
+        array = ContiguousArray<String>()
+        self.capacity = capacity
+        array.reserveCapacity(capacity)
+    }
+    
+    mutating func write() -> Double {
+        let start = CFAbsoluteTimeGetCurrent()
+        array.append("42")
+        return CFAbsoluteTimeGetCurrent() - start
+    }
+    
+    func read() -> Double {
+        let i = Int(arc4random_uniform(UInt32(array.count)))
+        let start = CFAbsoluteTimeGetCurrent()
+        let _ = array[i]
+        return CFAbsoluteTimeGetCurrent() - start
+    }
+    
+    func enumerate() -> Double {
+        let start = CFAbsoluteTimeGetCurrent()
+        array.forEach { _ in }
+        return CFAbsoluteTimeGetCurrent() - start
+    }
+    
+    var description: String {
+        return "ContArray \(capacity > 0 ? "R " : "NR") "
     }
 }
 
@@ -55,29 +88,26 @@ class ProfilableNSMutableArray : Profilable {
     }
     
     func write() -> Double {
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         array.add("42")
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     func read() -> Double {
         let i = Int(arc4random_uniform(UInt32(array.count)))
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         let _ = array[i]
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
      func enumerate() -> Double {
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         array.forEach { _ in }
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     var description: String {
-        return "\(String(describing:type(of: array))) (\(capacity))"
+        return "  NSArray \(capacity > 0 ? "R " : "NR") "
     }
 }
 
@@ -93,33 +123,29 @@ class ProfilableCFMutableArray : Profilable {
     
     func write() -> Double {
         var item = "5"
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         CFArrayAppendValue(array, &item)
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     func read() -> Double {
         let count = CFArrayGetCount(array)
         let i = Int(arc4random_uniform(UInt32(count)))
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         CFArrayGetValueAtIndex(array, CFIndex(i))
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     func enumerate() -> Double {
         var item = "6"
         let count = CFArrayGetCount(array)
-        let start = Date()
+        let start = CFAbsoluteTimeGetCurrent()
         CFArrayGetFirstIndexOfValue(array, CFRange.init(location: CFIndex(), length: count), &item)
-        let finish = Date()
-        return finish.timeIntervalSince(start)
+        return CFAbsoluteTimeGetCurrent() - start
     }
     
     public var description: String {
-        
-        return "\(String(describing:type(of: array))) \(capacity)"
+        return "  CFArray \(capacity > 0 ? "R " : "NR") "
     }
 }
 
@@ -154,7 +180,7 @@ class Result {
 }
 
 extension TimeInterval {
-    func toString() -> String {
+    var toString: String {
         let ti = Int(self)
         let ms = Int((self.truncatingRemainder(dividingBy: 1) * 100000))
         let seconds = ti % 60
@@ -166,10 +192,7 @@ extension TimeInterval {
 
 extension Result {
     var toString: String {
-        return "\n Min . . \(min.toString())" +
-            "\n Avg . . \(avarage.toString())" +
-            "\n Max . . \(max.toString())" +
-            "\n Total . \(total.toString())"
+        return " \(min.toString) | \(avarage.toString) | \(max.toString) | \(total.toString)"
     }
 }
 
@@ -192,26 +215,61 @@ func profile(_ action: @autoclosure () -> TimeInterval, with count: Int) -> Resu
 }
 
 func run(_ rounds: Int) {
-    print("Runing \(rounds) rounds test")
     let suts : [Profilable] = [ProfilableNSMutableArray(),
                                ProfilableNSMutableArray(capacity: rounds),
+                               ProfilableContiguousArray(),
+                               ProfilableContiguousArray(capacity: rounds),
                                ProfilableCFMutableArray(),
                                ProfilableCFMutableArray(capacity: rounds),
                                ProfilableArray(),
                                ProfilableArray(capacity: rounds)]
+    let group = DispatchGroup()
+    
+    var results = [(type: Profilable, write: Result, read: Result, enumerate: Result)]()
     for var sut in suts {
-        print("\(sut) :\n")
-        print("Write : \(profile(sut.write(), with: rounds).toString)\n")
-        print("Read : \(profile(sut.read(), with: 100).toString)\n")
-        print("Enumerate : \(profile(sut.enumerate(), with: 4).toString)\n")
+        group.enter()
+        DispatchQueue.global().async {
+            results.append((type: sut,
+                            write: profile(sut.write(), with: rounds),
+                            read: profile(sut.read(), with: 100),
+                            enumerate: profile(sut.enumerate(), with: 4)))
+            group.leave()
+        }
+    }
+    
+    group.notify(queue: .main) {
+        print("\n # # # Runing \(rounds) rounds test # # #")
+        print("\n-- Write --")
+        print("    Type     |     Min     |     Avg     |     Max     |    Total    ")
+        results.sorted { $0.type.description > $1.type.description } .forEach { (type, write, _, _) in
+            print("\(type)|\(write.toString)")
+        }
+        
+        print("\n-- Read --")
+        print("    Type     |     Min     |     Avg     |     Max     |    Total    ")
+        results.sorted { $0.type.description > $1.type.description } .forEach { (type, _, read, _) in
+            print("\(type)|\(read.toString)")
+        }
+        
+        print("\n-- Enumerate --")
+        print("    Type     |     Min     |     Avg     |     Max     |    Total    ")
+        results.sorted { $0.type.description > $1.type.description } .forEach { (type, _, _, enumerate) in
+            print("\(type)|\(enumerate.toString)")
+        }
     }
 }
 
 print("✅")
 
-run(100)
+DispatchQueue.global().sync {
+    run(100)
+}
 
-run(1000)
+DispatchQueue.global().sync {
+    run(1000)
+}
 
-run(10000)
+DispatchQueue.global().sync {
+    run(10000)
+}
 
