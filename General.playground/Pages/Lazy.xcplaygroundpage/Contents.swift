@@ -47,3 +47,17 @@ print(c.someImutableLazyParameter)
 c.someMutableLazyParameter = { return "Some other parameter" }()
 print(c.someMutableLazyParameter)
 
+
+// ------ Lazy collection ------
+print(" -- Lazy collection --")
+
+func fibonacci(of num: Int) -> Int {
+    if num < 2 {
+        return num
+    } else {
+        return fibonacci(of: num - 1) + fibonacci(of: num - 2)
+    }
+}
+
+let lazyFibonacciSequence = Array(0...199).lazy.map(fibonacci)
+print(lazyFibonacciSequence[19])
