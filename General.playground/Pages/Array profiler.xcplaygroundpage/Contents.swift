@@ -143,14 +143,16 @@ class ProfilableCFMutableArray : Profilable {
     }
 }
 
-class Result {
+class MeasurementResult {
     private var _count: Int = 0
     private var _total: Double = 0
     
+    var type: MeasureType
     var min: Double
     var max: Double
     
-    init() {
+    init(type: MeasureType) {
+        self.type = type
         min = Double.infinity
         max = Double.infinity * (-1)
     }
@@ -173,6 +175,12 @@ class Result {
     }
 }
 
+extension MeasurementResult {
+    var toString: String {
+        return " \(min.toString) | \(avarage.toString) | \(max.toString) | \(total.toString)"
+    }
+}
+
 extension TimeInterval {
     var toString: String {
         let ti = Int(self)
@@ -184,82 +192,78 @@ extension TimeInterval {
     }
 }
 
-extension Result {
-    var toString: String {
-        return " \(min.toString) | \(avarage.toString) | \(max.toString) | \(total.toString)"
-    }
-}
-
-func profile(_ action: @autoclosure () -> TimeInterval, with count: Int) -> Result {
-    let result = Result()
-    for _ in 1...count {
-        let time = action()
-        result.total += time
+class Profiler {
+    private init() {}
+    
+    static func run(_ rounds: Int) {
+        var results = [(type: Profilable, results: [MeasurementResult])]()
+        let group = DispatchGroup()
         
-        if time > result.max {
-            result.max = time
+        let suts : [Profilable] = [ProfilableNSMutableArray(),
+                                   ProfilableNSMutableArray(capacity: rounds),
+                                   ProfilableContiguousArray(),
+                                   ProfilableContiguousArray(capacity: rounds),
+                                   ProfilableCFMutableArray(),
+                                   ProfilableCFMutableArray(capacity: rounds),
+                                   ProfilableArray(),
+                                   ProfilableArray(capacity: rounds)]
+        for var sut in suts {
+            group.enter()
+            DispatchQueue.global().async {
+                results.append((type: sut,
+                                results: [profile(.write, sut.measure, with: rounds),
+                                          profile(.read, sut.measure, with: 100),
+                                          profile(.enumerate, sut.measure, with: 10)]))
+                group.leave()
+            }
         }
         
-        if time < result.min {
-            result.min = time
-        }
-    }
-    
-    return result
-}
-
-func run(_ rounds: Int) {
-    var results = [(type: Profilable, write: Result, read: Result, enumerate: Result)]()
-    let group = DispatchGroup()
-    
-    let suts : [Profilable] = [ProfilableNSMutableArray(),
-                               ProfilableNSMutableArray(capacity: rounds),
-                               ProfilableContiguousArray(),
-                               ProfilableContiguousArray(capacity: rounds),
-                               ProfilableCFMutableArray(),
-                               ProfilableCFMutableArray(capacity: rounds),
-                               ProfilableArray(),
-                               ProfilableArray(capacity: rounds)]
-    for var sut in suts {
-        group.enter()
-        DispatchQueue.global().async {
-            results.append((type: sut,
-                            write: profile(sut.measure(.write), with: rounds),
-                            read: profile(sut.measure(.read), with: 100),
-                            enumerate: profile(sut.measure(.enumerate), with: 4)))
-            group.leave()
+        group.notify(queue: .main) {
+            print("\n # # # Runing \(rounds) rounds test # # #")
+            printOut(results.sorted(by: { $0.type.description > $1.type.description }))
         }
     }
     
-    group.notify(queue: .main) {
-        print("\n # # # Runing \(rounds) rounds test # # #")
-        print("\n-- Write --")
-        print("       Type      |     Min     |     Avg     |     Max     |    Total    ")
-        results.sorted { $0.type.description > $1.type.description } .forEach { (type, write, _, _) in
-            print("\(type)|\(write.toString)")
+    private static func printOut(_ measurements: [(type: Profilable, results: [MeasurementResult])]) {
+        var n = 0
+        measurements.first?.results.forEach { measurement in
+            print("\n-- \(measurement.type) --")
+            print("       Type      |     Min     |     Avg     |     Max     |    Total    ")
+            measurements.forEach { (type, results) in
+                print("\(type)|\(results[n].toString)")
+            }
+            n += 1
+        }
+    }
+    
+    private static func profile(_ type: MeasureType,
+                                _ action: (MeasureType) -> TimeInterval,
+                                with count: Int) -> MeasurementResult {
+        let result = MeasurementResult(type: type)
+        for _ in 1...count {
+            let time = action(type)
+            result.total += time
+            
+            if time > result.max {
+                result.max = time
+            }
+            
+            if time < result.min {
+                result.min = time
+            }
         }
         
-        print("\n-- Read --")
-        print("       Type      |     Min     |     Avg     |     Max     |    Total    ")
-        results.sorted { $0.type.description > $1.type.description } .forEach { (type, _, read, _) in
-            print("\(type)|\(read.toString)")
-        }
-        
-        print("\n-- Enumerate --")
-        print("       Type      |     Min     |     Avg     |     Max     |    Total    ")
-        results.sorted { $0.type.description > $1.type.description } .forEach { (type, _, _, enumerate) in
-            print("\(type)|\(enumerate.toString)")
-        }
+        return result
     }
 }
 
 print("✅")
 
 DispatchQueue.global().sync {
-    run(100)
+    Profiler.run(100)
 }
 
 DispatchQueue.global().sync {
-    run(100000)
+    Profiler.run(100000)
 }
 
