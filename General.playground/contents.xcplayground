@@ -16,5 +16,6 @@
         <page name='Timer'/>
         <page name='ProxyLimiter'/>
         <page name='Useful hints'/>
+        <page name='NSOperations'/>
     </pages>
 </playground>
