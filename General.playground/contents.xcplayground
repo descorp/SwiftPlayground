@@ -6,6 +6,7 @@
         <page name='Collections'/>
         <page name='Dependency Injection'/>
         <page name='Enums'/>
+        <page name='Generics'/>
         <page name='Lazy'/>
         <page name='MultyThread'/>
         <page name='Operators'/>
