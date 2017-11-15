@@ -61,4 +61,39 @@ func fizzbuzz(number: Int) -> String {
     }
 }
 
+// Void is a empty tuple !!
+
+func doNothing() { }
+let result = doNothing()
+
+// Every primitive type in Swift is a single tuple
+
+let int1: (Int) = 1
+let int2: Int = (1)
+
+// Tuple comparison
+
+let noParameterA = ("A", "A")
+let noParameterB = ("B", "B")
+
+if noParameterA == noParameterB {
+    print("Match")
+}
+
+let a = (first: "A", second: "A")
+let b = (second1: "A", first1: "A")
+
+if a == b {
+    print("Match")
+}
+
+// Type Aliase
+
+typealias Name = (first: String, second: String)
+
+func someAction(name: Name) {
+    print("\(name.first) \(name.second)")
+}
+
+
 print("✅")
