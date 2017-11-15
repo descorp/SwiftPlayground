@@ -2,8 +2,6 @@
 
 import Foundation
 
-var str = "Hello, playground"
-
 //: [Next](@next)
 
 String(28, radix: 16)
@@ -14,3 +12,9 @@ for i in 0...36 {
     n += " \(String(i, radix: 36, uppercase: true))"
 }
 print(n)
+
+let str = "0123456789"
+
+for c in str.unicodeScalars {
+    print(c.value)
+}
