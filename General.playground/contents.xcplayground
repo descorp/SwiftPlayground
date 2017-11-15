@@ -2,6 +2,7 @@
 <playground version='6.0' target-platform='ios'>
     <pages>
         <page name='Array profiler'/>
+        <page name='BinaryTree'/>
         <page name='Compiler issues'/>
         <page name='Collections'/>
         <page name='Closures'/>
@@ -10,16 +11,15 @@
         <page name='Generics'/>
         <page name='Lazy'/>
         <page name='MultyThread'/>
+        <page name='NSOperations'/>
         <page name='Operators'/>
+        <page name='ProxyLimiter'/>
         <page name='Referencing'/>
         <page name='Referencing - private fields'/>
         <page name='Referencing - closures'/>
         <page name='Strings'/>
         <page name='Tuples'/>
         <page name='Timer'/>
-        <page name='ProxyLimiter'/>
         <page name='Useful hints'/>
-        <page name='NSOperations'/>
-        <page name='BinaryTree'/>
     </pages>
 </playground>
