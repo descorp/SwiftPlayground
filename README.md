@@ -8,18 +8,25 @@ Number of playgrounds to try different aspects of Swift.
 ### Simple playgrounds
 
 * Array profiler
+* BinaryTree
 * Compiler issues
+* Collections
+* Closures
 * Dependency Injection
 * Enums
+* Generics
 * Lazy
 * Multithreading
+* NSOperations
 * Operators
+* ProxyLimiter
 * Referencing
 * Referencing - private fields
 * Referencing - closures
+* Strings
 * Tuples
 * Timer
-* ProxyLimiter
+* Useful hints
 
 ### UI-based playgrounds
 
@@ -29,6 +36,8 @@ Number of playgrounds to try different aspects of Swift.
 
 * Rx
 * Promises
-* Algorithms
+
+## References
 
 Swift Image taken from <a href="https://icons8.com">Icon pack by Icons8</a>
+Some ideas based on <a href="https://gumroad.com/l/proswift">Pro Swift</a> by Paul Hudson
