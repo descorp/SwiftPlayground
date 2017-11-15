@@ -33,12 +33,29 @@ enum ProductType {
 var products: [(name: String, type: ProductType)] = [("🍎", .fruit),
                                                      ("🍑", .fruit),
                                                      ("🥒", .vegetable),
-                                                     ("🥚", .grocery), ("🥛", .dairy)]
+                                                     ("🥚", .grocery),
+                                                     ("🥛", .dairy)]
 var grouped = Dictionary(grouping: products) { item in item.type } .mapValues { items in items.map { item in item.name } }
 print(grouped.values.count)
 grouped[.other, default: []] += ("🍪")
 print(grouped.values.count)
-// - - - - - Dictionary - - - - -
 
+// - - - - - Set - - - - -
+
+var set = Set<Int>([1, 2, 3, 4, 5, 6, 7])
+var fibonacciSet = Set<Int>([1, 2, 3, 5, 8])
+
+if set.insert(8).inserted {
+    print("Inserted")
+}
+
+if set.remove(9) == nil{
+    print("No such element")
+}
+
+print(set.isStrictSuperset(of: fibonacciSet))
+let difference = set.symmetricDifference(fibonacciSet)
+
+// - - - - - Array - - - - -
 
 print("✅")
