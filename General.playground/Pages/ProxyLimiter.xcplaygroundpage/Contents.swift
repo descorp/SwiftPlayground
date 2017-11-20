@@ -20,49 +20,11 @@ protocol ProxyProtocal {
     func call(action: @autoclosure () -> Void)
 }
 
-class Proxy: NSLock, ProxyProtocal {
+class Proxy: ProxyProtocal {
     private let max: Int
     private let interval: Int
-    
-    private var _isTimerSet = false
-    private var n = 0
-    
-    private var isTimerSet: Bool {
-        get {
-            let temp: Bool?
-            self.lock()
-            temp = _isTimerSet
-            defer {
-                self.unlock()
-            }
-            
-            return temp!
-        }
-        set(value) {
-            self.lock()
-            _isTimerSet = value
-            self.unlock()
-        }
-    }
-    
-    private var counter: Int {
-        get {
-            let temp: Int?
-            self.lock()
-            temp = n
-            defer {
-                self.unlock()
-            }
-            
-            return temp!
-        }
-        
-        set(value) {
-            self.lock()
-            n = value
-            self.unlock()
-        }
-    }
+    private var counter = 0
+    private var isTimerSet = false
     
     init(max: Int, interval: Int) {
         self.max = max
@@ -70,7 +32,6 @@ class Proxy: NSLock, ProxyProtocal {
     }
     
     func call(action: @autoclosure () -> Void) {
-        
         if !isTimerSet {
             self.isTimerSet = true
             Timer.scheduledTimer(withTimeInterval: Double(interval), repeats: false) { [unowned self] _ in
