@@ -21,7 +21,7 @@ struct SomeValue: CustomDebugStringConvertible {
     var value: Int
     
     var debugDescription: String {
-        return "Ref(\(value))"
+        return "Val(\(value))"
     }
 }
 
@@ -31,6 +31,8 @@ protocol DataContract: CustomDebugStringConvertible {
     var objectArray: [SomeRef] {get set}
     var object: SomeRef {get set}
     
+    mutating func change()
+    
     mutating func mutatingTest()
     func nonmutatingTest()
 }
@@ -38,36 +40,31 @@ protocol DataContract: CustomDebugStringConvertible {
 extension DataContract {
     mutating func mutatingTest() {
         let otherValue = self
-        print("\n -- Before :")
-        print("Origine:\n\(self)")
+        self.change()
         
-        self.int = 7
-        self.array.append(SomeValue(value: 6))
-        self.array[0].value = -1
-        self.objectArray.append(SomeRef(value: 8))
-        self.objectArray[0].value = -1
-        self.object.value = 7
-        
-        print("\n -- After mutating :")
-        print("Origine:\n\(self)")
-        print("\nCopy:\n\(otherValue)")
+        print("\n --After mutating :")
+        print(" -Origine:\n\(self)")
+        print("\n -Copy:\n\(otherValue)")
     }
     
     func nonmutatingTest() {
         var otherValue = self
-        print("\n -- Before :")
-        print("Origine:\n\(self)")
+        otherValue.change()
         
-        otherValue.int = 7
-        otherValue.array.append(SomeValue(value: 6))
-        otherValue.array[0].value = -1
-        otherValue.objectArray.append(SomeRef(value: 8))
-        otherValue.objectArray[0].value = -1
-        otherValue.object.value = 7
-        
-        print("\n -- After nonmutating :")
-        print("Origine:\n\(self)")
-        print("\nCopy:\n\(otherValue)")
+        print("\n --After nonmutating :")
+        print(" -Origine:\n\(self)")
+        print("\n -Copy:\n\(otherValue)")
+    }
+    
+    mutating func change() {
+        self.int = 7
+        self.array.append(SomeValue(value: 6))
+        self.array[0].value = -1
+        self.array[1] = SomeValue(value: -2)
+        self.objectArray.append(SomeRef(value: 8))
+        self.objectArray[0].value = -1
+        self.objectArray[1] = SomeRef(value: -2)
+        self.object.value = 7
     }
 }
 
@@ -75,6 +72,7 @@ extension DataContract {
     var debugDescription: String {
         return
         """
+        \(type(of: self))
         int: \(int)
         array: \(array)
         objectArray: \(objectArray)
@@ -112,12 +110,22 @@ let object = SomeRef(value: 6)
 
 // Value types
 var value = ValueData(int: int, array: array, objectArray: objectArray, object: object)
+print("\n -- Before :")
+print(value)
+
 value.mutatingTest()
 ValueData(int: int, array: array, objectArray: objectArray, object: object).nonmutatingTest()
 
 // Reference types
 var ref = RefData(int: int, array: array, objectArray: objectArray, object: object)
-ref.mutatingTest()
-RefData(int: int, array: array, objectArray: objectArray, object: object).nonmutatingTest()
+print("\n -- Before :")
+DispatchQueue.global().sync {
+    print(ref)
+    DispatchQueue.global().sync {
+        ref.mutatingTest()
+        RefData(int: int, array: array, objectArray: objectArray, object: object).nonmutatingTest()
+    }
+}
+
 
 print("✅")
