@@ -1,6 +1,8 @@
 ![swift icon](https://png.icons8.com/?id=24465&size=96 "Icon pack by Icons8")
 # SwiftPlayground
 
+![Swift 3](https://img.shields.io/badge/Swift-3-blue.svg)
+
 Number of playgrounds to try different aspects of Swift.
 
 ## Content
