@@ -10,6 +10,7 @@
         <page name='Enums'/>
         <page name='Generics'/>
         <page name='Lazy'/>
+        <page name='Math'/>
         <page name='MultyThread'/>
         <page name='NSOperations'/>
         <page name='Operators'/>
