@@ -21,18 +21,82 @@ nan != -nan
 
 10.0 / 0
 -10.0 / 0
+10.0 / 1
+-10.0 / 1
 
+10.0 / -1
+-10.0 / 1
+
+0 / -1
+-1 / 0.0
+2 / -5
+
+0.0 / 0.0
 inf > inf
 inf < inf
 inf == inf
 0 / inf
+0 / -inf
 5 / inf
 -5 / inf
 5 / -inf
 5.0 / 0
 inf / 0
 -inf / 0
+inf - inf
+inf + inf
 
+-inf + -inf
+
+12 % 1
+12 % 5
+12 % -5
+-12 % 5
+-12 % -5
+5 % 12
+5 % -12
+-5 % 12
+-5 % -12
+
+5 % 5
+5 % -5
+-5 % 5
+-5 % -5
+
+0 % 3
+//3 % 0
+
+5 % 2
+5.0.remainder(dividingBy: 2.0)
+5.0.remainder(dividingBy: -2.0)
+-5.0.remainder(dividingBy: -2.0)
+5.0.remainder(dividingBy: Double.infinity)
+Double.infinity.remainder(dividingBy: Double.infinity)
+Double.infinity.remainder(dividingBy: -Double.infinity)
+Double.infinity.remainder(dividingBy: 2.0)
+0.0.remainder(dividingBy: 0.0)
+0.0.remainder(dividingBy: Double.infinity)
+0.0.remainder(dividingBy: -Double.infinity)
+5.0.remainder(dividingBy: 0.0)
+-5.0.remainder(dividingBy: 0.0)
+
+5.0.remainder(dividingBy: 5.0)
+5.0.remainder(dividingBy: -5.0)
+-5.0.remainder(dividingBy: 5.0)
+-5.0.remainder(dividingBy: -5.0)
+
+5.0.remainder(dividingBy: 6.0)
+5.0.remainder(dividingBy: -6.0)
+-5.0.remainder(dividingBy: 6.0)
+-5.0.remainder(dividingBy: -6.0)
+
+0.0.remainder(dividingBy: 5.0)
+0.0.remainder(dividingBy: -5.0)
+
+0.0.remainder(dividingBy: 1.0)
+0.0.remainder(dividingBy: -1.0)
+
+5.0.remainder(dividingBy: Double.nan)
 -0
 
 inf > -inf
@@ -76,7 +140,15 @@ c.isCanonical
 
 
 
+// Converting
 
+UInt(abs(-42344234))
+
+// Power
+
+pow(5.0, 2.0)
+pow(5.0, -2.0)
+pow(5.0, 2.0)
 
 
 
