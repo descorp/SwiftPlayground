@@ -19,6 +19,7 @@
         <page name='Referencing - private fields'/>
         <page name='Referencing - closures'/>
         <page name='Referencing - ref vs value'/>
+        <page name='Reflections'/>
         <page name='Strings'/>
         <page name='Tuples'/>
         <page name='Timer'/>
