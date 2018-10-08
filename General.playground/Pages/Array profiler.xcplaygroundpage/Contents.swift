@@ -24,6 +24,7 @@ extension Profilable {
 class ProfilableArray: Profilable {
     private var capacity: Int
     private var array: [String]
+    private var string = "42"
     
     init(capacity: Int = 0){
         array = [String]()
@@ -36,7 +37,7 @@ class ProfilableArray: Profilable {
         
         switch type {
         case .write:
-            return { [unowned self] in self.array.append("42") }
+            return { [unowned self] in self.array.append(self.string) }
         case .read:
             return { [unowned self] in let _ = self.array[i] }
         case .enumerate:
@@ -48,6 +49,39 @@ class ProfilableArray: Profilable {
     
     var description: String {
         return "    Array   \(capacity > 0 ? "R " : "NR")   "
+    }
+}
+
+class SomeClass {}
+
+class ProfilableObjectArray: Profilable {
+    private var capacity: Int
+    private var array: [SomeClass]
+    private let object = SomeClass()
+    
+    init(capacity: Int = 0){
+        array = [SomeClass]()
+        self.capacity = capacity
+        array.reserveCapacity(capacity)
+    }
+    
+    func getAction(_ type: MeasureType) -> () -> Void {
+        let i = Int(arc4random_uniform(UInt32(array.count)))
+        
+        switch type {
+        case .write:
+            return { [unowned self] in self.array.append(self.object) }
+        case .read:
+            return { [unowned self] in let _ = self.array[i] }
+        case .enumerate:
+            return { [unowned self] in self.array.forEach { _ in } }
+        case .check:
+            return { [unowned self] in print(self.array.count > 0 ? "Nice" : "Not Nice") }
+        }
+    }
+    
+    var description: String {
+        return " ArrayClass \(capacity > 0 ? "R " : "NR")   "
     }
 }
 
@@ -206,8 +240,10 @@ class Profiler {
                                    ProfilableCFMutableArray(),
                                    ProfilableCFMutableArray(capacity: rounds),
                                    ProfilableArray(),
-                                   ProfilableArray(capacity: rounds)]
-        for var sut in suts {
+                                   ProfilableArray(capacity: rounds),
+                                   ProfilableObjectArray(),
+                                   ProfilableObjectArray(capacity: rounds)]
+        for sut in suts {
             group.enter()
             DispatchQueue.global().async {
                 results.append((type: sut,
@@ -259,11 +295,22 @@ class Profiler {
 
 print("✅")
 
-DispatchQueue.global().sync {
-    Profiler.run(100)
+let runner = DispatchQueue(label: "Runner",
+                          qos: DispatchQoS.userInteractive,
+                          attributes: DispatchQueue.Attributes.concurrent ,
+                          autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit,
+                          target: nil)
+
+runner.async {
+    Profiler.run(512)
 }
 
-DispatchQueue.global().sync {
+runner.async {
+    Profiler.run(10000)
+}
+
+runner.async {
     Profiler.run(100000)
 }
+
 
